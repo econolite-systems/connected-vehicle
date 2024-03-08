@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.cvArchiveLoggerService.name }}
+data:
+  appsettings.Production.json: |
+    {
+      "Authentication": {
+          "Authority": "{{ .Values.url.identity }}"
+      },
+      "Kafka": {
+          "bootstrap": {
+              "servers": "{{ .Values.kafka.server }}"
+          },
+          "ssl": {
+            "ca": "{{.Values.kafka.ca}}",
+            "certificate": "{{.Values.kafka.certificate}}"
+          },
+          "sasl": {
+              "mechanism": "{{.Values.kafka.security.mechanism}}",
+              "username": "{{ .Values.kafka.userName }}"
+          },
+          "security": {
+              "protocol": "{{ .Values.kafka.security.protocol}}"
+          },
+          "groupId": "{{ .Values.cvArchiveLoggerService.kafka.groupId }}"
+      },
+      "Mongo": {
+        "DbName": "{{ .Values.mongo.databaseName }}"
+      },
+      "TenantId": "{{ .Values.tenantId }}"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cvArchiveLoggerService.name }}
+  labels:
+    app: {{ .Values.cvArchiveLoggerService.name }}
+    chart: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+  annotations:
+ 
+spec:
+  revisionHistoryLimit: 0
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Values.cvArchiveLoggerService.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cvArchiveLoggerService.name }}
+        release: {{ .Release.Name }}
+      annotations:
+
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              release: {{ .Release.Name }}
+      imagePullSecrets:
+        - name: {{ .Values.secrets.imagePullSecret }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.cvArchiveLoggerService.name }}
+      containers:
+        - name: {{ .Values.cvArchiveLoggerService.name }}
+          image: "{{ .Values.cvArchiveLoggerService.imageRepository }}:{{ .Values.cvArchiveLoggerService.imageTag  }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: Kafka__sasl__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.kafka.userName }}
+                  key: password
+            - name: ConnectionStrings__Mongo
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-cs
+                  key: MongoRWConnectionString
+            - name: ConnectionStrings__AzureBlobCoolStorageConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: blob-storage-cs
+                  key:  AzureBlobCoolStorageConnectionString
+          volumeMounts:
+            - name: config
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          {{- if .Values.cvArchiveLoggerService.probes.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          {{- end }}
+          resources:
+{{ toYaml .Values.cvArchiveLoggerService.resources | indent 12 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.cvArchiveLoggerService.name }}
+  labels:
+    app: {{ .Values.cvArchiveLoggerService.name }}
+    chart: {{ .Values.cvArchiveLoggerService.name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service | default "" }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.cvArchiveLoggerService.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Values.cvArchiveLoggerService.name }}
+    release: {{ .Release.Name }}

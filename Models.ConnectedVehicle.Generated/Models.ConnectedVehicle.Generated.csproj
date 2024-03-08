@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<!-- SPDX-License-Identifier: MIT -->
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    <Copyright>2023-&lt;&lt;CURRENT_YEAR&gt;&gt; Econolite Systems, Inc.</Copyright>
+</PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Models.ConnectedVehicle.Mapster\Models.ConnectedVehicle.Mapster.csproj" />
+    </ItemGroup>
+
+    <Target Name="Mapster" AfterTargets="AfterBuild">
+        <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet tool restore" />
+<!--        <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet mapster model -a $(TargetDir)$(ProjectName).dll -n Econolite.Ode.Models.ConnectedVehicle.Dto -o ../Models.ConnectedVehicle/Models -r" />-->
+        <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet mapster extension -a $(TargetDir)$(ProjectName).dll -n Econolite.Ode.Models.ConnectedVehicle.Dto -o ../Models.ConnectedVehicle/Models" />
+        <Exec WorkingDirectory="$(ProjectDir)" Command="dotnet mapster mapper -a $(TargetDir)$(ProjectName).dll -n Econolite.Ode.Models.ConnectedVehicle.Mappers -o ../Models.ConnectedVehicle/Mappers" />
+    </Target>
+
+    <ItemGroup>
+        <Generated Include="**\*.g.cs" />
+    </ItemGroup>
+</Project>

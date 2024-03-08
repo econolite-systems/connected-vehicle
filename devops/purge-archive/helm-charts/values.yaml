@@ -1,0 +1,12 @@
+odecvPurgeArchiveService:
+  name: ode-cv-purge-archive-service
+  imageRepository: cosysdev.azurecr.io/ode-cv-purge-archive-service
+  service:
+    port: 80
+  probes:
+    enabled: false
+  ingress:
+    host: api.mound-rd.cosysdev.com
+  kafka:
+    groupId: 'cv.purgeArchive'
+  resources: {}

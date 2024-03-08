@@ -1,0 +1,12 @@
+cvMinuteTotalsService:
+  name: ode-cv-minute-totals-service
+  imageRepository: cosysdev.azurecr.io/ode-cv-minute-totals-service
+  service:
+    port: 80
+  probes:
+    enabled: false
+  ingress:
+    host: api.mound-rd.cosysdev.com
+  kafka:
+    groupId: 'connectedVehicle.minuteTotals'
+  resources: {}

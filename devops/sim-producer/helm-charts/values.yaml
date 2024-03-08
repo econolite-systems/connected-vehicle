@@ -1,0 +1,12 @@
+cvSimProducer:
+  name: ode-cv-sim-producer
+  imageRepository: cosysdev.azurecr.io/ode-cv-sim-producer
+  service:
+    port: 80
+  probes:
+    enabled: false
+  ingress:
+    host: api.mound-rd.cosysdev.com
+  kafka:
+    groupId: 'cv.simulator.producer'
+  resources: {}

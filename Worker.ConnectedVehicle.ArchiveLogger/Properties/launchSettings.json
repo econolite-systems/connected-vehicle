@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: MIT
+// Copyright: 2023 Econolite Systems, Inc.
+
+{
+    "profiles": {
+        "Worker.ConnectedVehicle.ArchiveLogger": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "applicationUrl": "https://localhost:49307;http://localhost:49308"
+        }
+    }
+}

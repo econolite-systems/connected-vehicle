@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<!-- SPDX-License-Identifier: MIT -->
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Econolite.Ode.Services.ConnectedVehicle</RootNamespace>
+  <Copyright>2023-&lt;&lt;CURRENT_YEAR&gt;&gt; Econolite Systems, Inc.</Copyright>
+</PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)\common\Helpers\Helpers.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Cloud.Common\Cloud.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Messaging\Messaging.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Monitoring\Monitoring.csproj" />
+    <ProjectReference Include="..\Models.ConnectedVehicle.Mapster\Models.ConnectedVehicle.Mapster.csproj" />
+    <ProjectReference Include="..\Models.ConnectedVehicle\Models.ConnectedVehicle.csproj" />
+    <ProjectReference Include="..\Repository.ConnectedVehicle\Repository.ConnectedVehicle.csproj" />
+  </ItemGroup>
+
+</Project>

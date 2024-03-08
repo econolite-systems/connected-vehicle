@@ -1,0 +1,12 @@
+cvLoggerService:
+  name: ode-cv-logger-service
+  imageRepository: cosysdev.azurecr.io/ode-cv-logger-service
+  service:
+    port: 80
+  probes:
+    enabled: false
+  ingress:
+    host: api.mound-rd.cosysdev.com
+  kafka:
+    groupId: 'cv.logging'
+  resources: {}

@@ -1,0 +1,21 @@
+﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ENV SolutionDir /src
+WORKDIR /src
+COPY . .
+# Generate model files
+RUN dotnet new tool-manifest
+RUN dotnet tool install Mapster.Tool
+RUN dotnet build ./Models.ConnectedVehicle/ -c Release -o /app/build
+WORKDIR "/src/Worker.ConnectedVehicle.PurgeArchive/"
+RUN dotnet build "Worker.ConnectedVehicle.PurgeArchive.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Worker.ConnectedVehicle.PurgeArchive.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Worker.ConnectedVehicle.PurgeArchive.dll"]

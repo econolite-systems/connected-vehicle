@@ -1,0 +1,17 @@
+cvPurgeLog:
+  name: ode-cv-purge-log-service
+  replicaCount: 1
+  imageRepository: cosysdev.azurecr.io/ode-cv-purge-log-service
+  imageTag: 1.0.42
+  probes:
+    enabled: false
+  kafka:
+    groupId: 'cv.purgeLog'
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  

@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ODE Connected Vehicle Purge Log Service
+name: "ode-cv-purge-log-service"
+version: 0.1.0

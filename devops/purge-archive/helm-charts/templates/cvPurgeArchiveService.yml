@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.odecvPurgeArchiveService.name }}
+data:
+  appsettings.Production.json: |
+    {
+      "Authentication": {
+          "Authority": "{{ .Values.url.identity }}"
+      },
+      "Kafka": {
+          "bootstrap": {
+              "servers": "{{ .Values.kafka.server }}"
+          },
+          "ssl": {
+            "ca": "{{.Values.kafka.ca}}",
+            "certificate": "{{.Values.kafka.certificate}}"
+          },
+          "sasl": {
+              "mechanism": "{{.Values.kafka.security.mechanism}}",
+              "username": "{{ .Values.kafka.userName }}"
+          },
+          "security": {
+              "protocol": "{{ .Values.kafka.security.protocol}}"
+          },
+          "groupId": "{{ .Values.odecvPurgeArchiveService.kafka.groupId }}"
+      },
+      "Mongo": {
+        "DbName": "{{ .Values.mongo.databaseName }}"
+      },
+      "TenantId": "{{ .Values.tenantId }}"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.odecvPurgeArchiveService.name }}
+  labels:
+    app: {{ .Values.odecvPurgeArchiveService.name }}
+    chart: {{ .Values.odecvPurgeArchiveService.name }}
+    release: {{ .Release.Name }}
+  annotations:
+spec:
+  revisionHistoryLimit: 0
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Values.odecvPurgeArchiveService.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.odecvPurgeArchiveService.name }}
+     
+        release: {{ .Release.Name }}
+      annotations:
+
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              release: {{ .Release.Name }}
+      imagePullSecrets:
+        - name: {{ .Values.secrets.imagePullSecret }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ .Values.odecvPurgeArchiveService.name }}
+      containers:
+        - name: {{ .Values.odecvPurgeArchiveService.name }}
+          image: "{{ .Values.odecvPurgeArchiveService.imageRepository }}:{{ .Values.odecvPurgeArchiveService.imageTag  }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: Kafka__sasl__password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.kafka.userName }}
+                  key: password
+            - name: ConnectionStrings__Mongo
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-cs
+                  key: MongoRWConnectionString
+            - name: ConnectionStrings__AzureBlobCoolStorageConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: blob-storage-cs
+                  key:  AzureBlobCoolStorageConnectionString
+          volumeMounts:
+            - name: config
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          {{- if .Values.odecvPurgeArchiveService.probes.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          {{- end }}
+          resources:
+{{ toYaml .Values.odecvPurgeArchiveService.resources | indent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.odecvPurgeArchiveService.name }}
+  labels:
+    app: {{ .Values.odecvPurgeArchiveService.name }}
+    chart: {{ .Values.odecvPurgeArchiveService.name }}
+    release: {{ .Release.Name }}
+ 
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.odecvPurgeArchiveService.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Values.odecvPurgeArchiveService.name }}
+    release: {{ .Release.Name }}

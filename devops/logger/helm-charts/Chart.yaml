@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ODE Connected Vehicle Logger Service
+name: "ode-cv-logger-service"
+version: 0.1.0

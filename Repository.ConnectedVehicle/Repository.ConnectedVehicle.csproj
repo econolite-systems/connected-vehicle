@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<!-- SPDX-License-Identifier: MIT -->
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Econolite.Ode.Repository.ConnectedVehicle</RootNamespace>
+  <Copyright>2023-&lt;&lt;CURRENT_YEAR&gt;&gt; Econolite Systems, Inc.</Copyright>
+</PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(SolutionDir)\common\Cloud.Common\Cloud.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Messaging\Messaging.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Persistence.Common\Persistence.Common.csproj" />
+    <ProjectReference Include="$(SolutionDir)\common\Persistence.Mongo\Persistence.Mongo.csproj" />
+    <ProjectReference Include="..\Models.ConnectedVehicle\Models.ConnectedVehicle.csproj" />
+  </ItemGroup>
+
+</Project>

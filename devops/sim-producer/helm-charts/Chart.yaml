@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ODE Connected Vehicle Simulator Producer
+name: "ode-cv-sim-producer"
+version: 0.1.0
